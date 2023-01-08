@@ -18,9 +18,9 @@ namespace Movies.Service.Services
         private readonly IUsersRepository _usersRepository;
         private readonly IMapper _mapper;
         public UsersService(IGenericRepository<User> repository,
-            IUnitOfWork unitOfWork, IUsersRepository _usersRepositor, IMapper mapper) : base(repository, unitOfWork)
+            IUnitOfWork unitOfWork, IUsersRepository usersRepository, IMapper mapper) : base(repository, unitOfWork)
         {
-            _usersRepository = userRepository;
+            _usersRepository = usersRepository;
             _mapper = mapper;
         }
 
