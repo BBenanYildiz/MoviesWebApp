@@ -25,13 +25,13 @@ namespace Movies.API.Controllers
         [Produces("application/json")]
         public async Task<IActionResult> Get()
         {
-           //Şimdilik burda kalsın burayıda düzenlicez.
+            //Şimdilik burda kalsın burayıda düzenlicez.
             string apiKey = ApiKey();
-            string apiUrl = "https://api.themoviedb.org/3/movie/550?api_key=" + apiKey;
+            string apiUrl = "https://api.themoviedb.org/3/movie/popular?api_key=" + "2ffe153e25788cfac01580dae1018af4";
 
             var response = WebHelper.Get(apiUrl);
 
-            PopularMovieModel.Root myDeserializedClass = JsonConvert.DeserializeObject<PopularMovieModel.Root>(response);
+            Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(response);
 
             return Ok(myDeserializedClass);
         }
@@ -78,7 +78,7 @@ namespace Movies.API.Controllers
         {
             //Filmi Tavsiye Etme 
 
-           var result = MoviesService.SharedMail(id, mailAdress);
+            var result = MoviesService.SharedMail(id, mailAdress);
 
             //Sonuça göre işlem yapıcaz direk resultu basıcaz
 

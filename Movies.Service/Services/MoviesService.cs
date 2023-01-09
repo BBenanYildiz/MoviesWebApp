@@ -51,7 +51,7 @@ namespace Movies.Service.Services
                     Imbdpoint = "3",
                     MovieDate = "1999/20/03",
                     MovieName = "Leyla İle Mecnun",
-                    MailAdress = "pakcan.emre@gmail.com"
+                    MailAdress = mailAdress
                 };
 
                 var mailResult = MailHelper.SendMailInformation(mailInformation);
