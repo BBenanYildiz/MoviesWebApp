@@ -1,4 +1,6 @@
-﻿using Movies.Core.Model;
+﻿using AutoMapper;
+using Movies.Core.Helper;
+using Movies.Core.Model;
 using Movies.Core.Repositories;
 using Movies.Core.Services;
 using Movies.Core.UnitOfWorks;
@@ -13,6 +15,15 @@ namespace Movies.Service.Services
 {
     public class MoviesService : GenericService<Movie>, IMoviesService
     {
+        private readonly IMoviesRepository _moviesRepository;
+        private readonly IMapper _mapper;
+        public MoviesService(IGenericRepository<Movie> repository,
+            IUnitOfWork unitOfWork, IMoviesRepository moviesRepository, IMapper mapper) : base(repository, unitOfWork)
+        {
+            _moviesRepository = moviesRepository;
+            _mapper = mapper;
+        }
+
         /// <summary>
         /// Seçilen Filmi verilen mail adresine gönderir
         /// </summary>
@@ -36,18 +47,14 @@ namespace Movies.Service.Services
 
                 //Burda Gelen Datalar İle Doldurulacak Alan
                 MailSendInformationModel mailInformation = new MailSendInformationModel
-    {
-        private readonly IMoviesRepository _moviesRepository;
-        private readonly IMapper _mapper;
-        public MoviesService(IGenericRepository<Movie> repository,
-            IUnitOfWork unitOfWork, IMoviesRepository moviesRepository, IMapper mapper) : base(repository, unitOfWork)
+                {
                     Imbdpoint = "3",
                     MovieDate = "1999/20/03",
                     MovieName = "Leyla İle Mecnun",
                     MailAdress = "pakcan.emre@gmail.com"
                 };
 
-              var mailResult = MailHelper.SendMailInformation(mailInformation);
+                var mailResult = MailHelper.SendMailInformation(mailInformation);
                 if (!mailResult)
                     throw new DirectoryNotFoundException("E-Posta Gönderilirken Bir Hata İle Karşılaşıldı.");
 
@@ -55,9 +62,8 @@ namespace Movies.Service.Services
                 return "İşlem Başarılı"; //Burası Result İle Dönmeli
             }
             catch (Exception ex)
-        {
-            _moviesRepository = moviesRepository;
-            _mapper = mapper;
+            {
+
                 //Buraya Log atmak lazım
                 throw ex;
             }
