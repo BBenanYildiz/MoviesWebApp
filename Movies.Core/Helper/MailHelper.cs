@@ -1,4 +1,4 @@
-﻿using Movies.Core.Model;
+﻿using Movies.Core.ViewModels;
 using System.Net;
 using System.Net.Mail;
 

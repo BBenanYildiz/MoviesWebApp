@@ -1,20 +1,27 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Mvc;
+using Movies.Core.DTOs;
 using Movies.Core.Helper;
 using Movies.Core.Model;
 using Movies.Service.Services;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Movies.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class MoviesController : ControllerBase
+    public class MoviesController : CustomBaseController
     {
         private readonly IConfiguration _configuration;
+        private readonly IMapper _mapper;
 
-        public MoviesController(IConfiguration configuration)
+        public MoviesController(IConfiguration configuration,
+            IMapper mapper)
         {
             _configuration = configuration;
+            _mapper = mapper;
         }
 
         /// <summary>
@@ -27,13 +34,14 @@ namespace Movies.API.Controllers
         {
             //Şimdilik burda kalsın burayıda düzenlicez.
             string apiKey = ApiKey();
-            string apiUrl = "https://api.themoviedb.org/3/movie/popular?api_key=" + "2ffe153e25788cfac01580dae1018af4";
+            string baseUrl = BaseUrl();
+             string apiUrl = baseUrl + "movie/popular?api_key=" + apiKey;
 
             var response = WebHelper.Get(apiUrl);
-
             Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(response);
+            var rootDtos = _mapper.Map<List<MovieDTOs>>(myDeserializedClass.results.ToList());
 
-            return Ok(myDeserializedClass);
+            return CreateActionResult(CustomResponseDto<List<MovieDTOs>>.Success(200, rootDtos));
         }
 
         /// <summary>
@@ -46,9 +54,18 @@ namespace Movies.API.Controllers
         [Produces("application/json")]
         public async Task<IActionResult> GetDetail(int id)
         {
-            //Filmin Detayını Döndüğümüz Kısı Api
+            //Filmin Detayını Döndüğümüz Kısım Api
 
-            return Ok();
+            string apiKey = ApiKey();
+            string baseUrl = BaseUrl();
+
+            string apiUrl = baseUrl + "movie/"+ id + "?api_key=" + apiKey;
+            var response = WebHelper.Get(apiUrl);
+            var myDeserializedClass = JsonConvert.DeserializeObject<Movie>(response);
+
+            var movieDtos = _mapper.Map <MovieDTOs>(myDeserializedClass);
+
+            return CreateActionResult(CustomResponseDto<MovieDTOs>.Success(200, movieDtos));
         }
 
         /// <summary>
@@ -82,7 +99,15 @@ namespace Movies.API.Controllers
 
             //Sonuça göre işlem yapıcaz direk resultu basıcaz
 
-            return Ok();
+            if (!string.IsNullOrEmpty(result))
+            {
+                // Bakılacak
+                return CreateActionResult(CustomResponseDto<NoContentDTO>.Success(200));
+            }
+            else
+            {
+                return CreateActionResult(CustomResponseDto<NoContentDTO>.Fail(400, "E-Posta Gönderilirken Bir Hata İle Karşılaşıldı."));
+            }
         }
 
 
@@ -91,6 +116,13 @@ namespace Movies.API.Controllers
         {
             var apiKey = _configuration.GetValue<string>("TmbdApiKey:api_key");
             return apiKey;
+        }
+
+        //AppSetting Dosyasından BaseUrl 'i Çekiyoruz.
+        private string BaseUrl()
+        {
+            var baseUrl = _configuration.GetValue<string>("BaseUrl:base_url");
+            return baseUrl;
         }
     }
 }

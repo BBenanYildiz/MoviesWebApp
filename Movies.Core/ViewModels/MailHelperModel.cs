@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Movies.Core.Model
+namespace Movies.Core.ViewModels
 {
     public class MailHelperModel
     {

@@ -1,8 +1,16 @@
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
-using Movies.Repository;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Movies.API.Modules;
+using Movies.Core.Repositories;
+using Movies.Core.Services;
+using Movies.Core.UnitOfWorks;
+using Movies.Repository;
+using Movies.Repository.Repositories;
+using Movies.Repository.UnitOfWorks;
+using Movies.Service.Services;
+using NLayerApp.Service.Mapping;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,6 +21,8 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddAutoMapper(typeof(MapProfile));
 
 builder.Services.AddDbContext<AppDbContext>(x =>
 {

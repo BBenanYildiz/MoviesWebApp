@@ -4,6 +4,7 @@ using Movies.Core.Model;
 using Movies.Core.Repositories;
 using Movies.Core.Services;
 using Movies.Core.UnitOfWorks;
+using Movies.Core.ViewModels;
 using NLayerApp.Core.Services;
 using System;
 using System.Collections.Generic;
