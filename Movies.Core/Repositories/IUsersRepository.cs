@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Movies.Core.Repositories
 {
-    public interface IMoviesRepository : IGenericRepository<Movie>
+    public interface IUsersRepository : IGenericRepository<User>
     {
     }
 }

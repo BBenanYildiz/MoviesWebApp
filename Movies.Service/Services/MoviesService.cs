@@ -1,5 +1,8 @@
-﻿using Movies.Core.Helper;
-using Movies.Core.Model;
+﻿using Movies.Core.Model;
+using Movies.Core.Repositories;
+using Movies.Core.Services;
+using Movies.Core.UnitOfWorks;
+using NLayerApp.Core.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Movies.Service.Services
 {
-    public class MoviesService
+    public class MoviesService : GenericService<Movie>, IMoviesService
     {
         /// <summary>
         /// Seçilen Filmi verilen mail adresine gönderir
@@ -33,7 +36,11 @@ namespace Movies.Service.Services
 
                 //Burda Gelen Datalar İle Doldurulacak Alan
                 MailSendInformationModel mailInformation = new MailSendInformationModel
-                {
+    {
+        private readonly IMoviesRepository _moviesRepository;
+        private readonly IMapper _mapper;
+        public MoviesService(IGenericRepository<Movie> repository,
+            IUnitOfWork unitOfWork, IMoviesRepository moviesRepository, IMapper mapper) : base(repository, unitOfWork)
                     Imbdpoint = "3",
                     MovieDate = "1999/20/03",
                     MovieName = "Leyla İle Mecnun",
@@ -48,10 +55,13 @@ namespace Movies.Service.Services
                 return "İşlem Başarılı"; //Burası Result İle Dönmeli
             }
             catch (Exception ex)
-            {
+        {
+            _moviesRepository = moviesRepository;
+            _mapper = mapper;
                 //Buraya Log atmak lazım
                 throw ex;
             }
         }
+
     }
 }
