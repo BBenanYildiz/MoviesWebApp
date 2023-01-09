@@ -8,6 +8,7 @@ namespace Movies.Core.Model
 {
     public class PopularMovieModel
     {
+        // Film Türleri
         public class Genre
         {
             public int id { get; set; }
