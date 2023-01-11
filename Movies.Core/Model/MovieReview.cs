@@ -1,13 +1,16 @@
-﻿namespace Movies.Core.Model
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Movies.Core.Model
 {
     public class MovieReview
     {
+        [Key]
         public int Id { get; set; }
         public int MovieId { get; set; }
-        public ICollection<Movie> Movie { get; set; }
+        public List<Movie> Movie { get; set; }
         public int Score { get; set; }
-        public int Note { get; set; }
+        public string Note { get; set; }
         public int UserId { get; set; }
-        public ICollection<User> Users { get; set; }
+        public List<User> Users { get; set; }
     }
 }

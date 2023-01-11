@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Movies.Core.DTOs;
 using Movies.Core.Model;
 using Movies.Core.Repositories;
 using Movies.Core.Services;

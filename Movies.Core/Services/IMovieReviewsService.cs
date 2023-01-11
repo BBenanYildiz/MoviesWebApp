@@ -1,4 +1,5 @@
-﻿using Movies.Core.Model;
+﻿using Movies.Core.DTOs;
+using Movies.Core.Model;
 using Movies.Core.Services;
 using System;
 using System.Collections.Generic;

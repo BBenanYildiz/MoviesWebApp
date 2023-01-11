@@ -15,7 +15,7 @@ namespace NLayerApp.Repository.Repositories
     {
         public MovieReviewsRepository(AppDbContext context) : base(context)
         {
+
         }
-      
     }
 }

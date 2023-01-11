@@ -7,6 +7,10 @@ using Movies.Core.Model;
 using Movies.Service.Services;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using NLayerApp.Core.Services;
+using System.Drawing;
+using System.Globalization;
+using System.Threading;
 
 namespace Movies.API.Controllers
 {
@@ -16,26 +20,67 @@ namespace Movies.API.Controllers
     {
         private readonly IConfiguration _configuration;
         private readonly IMapper _mapper;
-
+        private readonly IMoviesService _moviesService;
+        private readonly IMovieReviewsService _movieReviewsService;
         public MoviesController(IConfiguration configuration,
-            IMapper mapper)
+            IMapper mapper,
+            IMoviesService moviesService,
+            IMovieReviewsService movieReviewsService)
         {
             _configuration = configuration;
             _mapper = mapper;
+            _moviesService = moviesService;
+            _movieReviewsService = movieReviewsService;
         }
 
         /// <summary>
-        /// Tüm filmleri getirir.
+        /// Tüm filmleri getirir ve veritabanına insert işlemi gerçekleştirir.
+        /// Bu kısımı göstermeyeceğiz
         /// </summary>
         /// <returns></returns>
         [HttpGet]
         [Produces("application/json")]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> GetAll()
         {
-            //Şimdilik burda kalsın burayıda düzenlicez.
             string apiKey = ApiKey();
             string baseUrl = BaseUrl();
-             string apiUrl = baseUrl + "movie/popular?api_key=" + apiKey;
+            string apiUrl = baseUrl + "discover/movie?api_key=" + apiKey;
+
+            var response = WebHelper.Get(apiUrl);
+            Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(response);
+            var rootDtos = _mapper.Map<List<MovieDTOs>>(myDeserializedClass.results.ToList());
+
+            foreach (var item in rootDtos)
+            {
+                Movie entity = new Movie();
+
+                entity.adult = item.adult;
+                entity.backdrop_path = item.backdrop_path;
+                entity.original_language = item.original_language;
+                entity.original_title = item.original_title;
+                entity.overview = item.overview;
+                entity.popularity = item.popularity;
+                entity.poster_path = item.poster_path;
+                entity.release_date = item.release_date;
+                entity.title = item.title;
+                entity.video = item.video;
+                entity.vote_average = item.vote_average;
+                entity.vote_count = item.vote_count;
+
+                await _moviesService.AddAsync(entity);
+            }
+
+            return CreateActionResult(CustomResponseDto<List<MovieDTOs>>.Success(200, rootDtos));
+        }
+
+        [Route("get/{page}", Name = "GetMoviePage")]
+        [HttpGet]
+        [Produces("application/json")]
+        public async Task<IActionResult> GetMoviePage(int page)
+        {
+            string apiKey = ApiKey();
+            string baseUrl = BaseUrl();
+            string apiUrl = baseUrl + "discover/movie?api_key=" + apiKey + "&sort_by=popularity.desc&page=" + page;
 
             var response = WebHelper.Get(apiUrl);
             Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(response);
@@ -43,6 +88,8 @@ namespace Movies.API.Controllers
 
             return CreateActionResult(CustomResponseDto<List<MovieDTOs>>.Success(200, rootDtos));
         }
+
+
 
         /// <summary>
         /// Film detayını getirir.
@@ -59,13 +106,24 @@ namespace Movies.API.Controllers
             string apiKey = ApiKey();
             string baseUrl = BaseUrl();
 
-            string apiUrl = baseUrl + "movie/"+ id + "?api_key=" + apiKey;
+            string apiUrl = baseUrl + "movie/" + id + "?api_key=" + apiKey;
             var response = WebHelper.Get(apiUrl);
             var myDeserializedClass = JsonConvert.DeserializeObject<Movie>(response);
 
-            var movieDtos = _mapper.Map <MovieDTOs>(myDeserializedClass);
+            var movieDetail = _mapper.Map<MovieDetailDTOs>(myDeserializedClass);
 
-            return CreateActionResult(CustomResponseDto<MovieDTOs>.Success(200, movieDtos));
+            //Filme ait yorumlar ve puanlar çekilir.
+            var movieReivewDetail = _movieReviewsService
+                .GetAllAsync()
+                .Result
+                .Where(x=>x.MovieId== movieDetail.id);
+
+            var movieReivewDetailDTOs = _mapper.Map<List<MovieReviewDetailsDTOs>>(movieReivewDetail);
+
+
+            movieDetail.details = movieReivewDetailDTOs.ToList();
+
+            return CreateActionResult(CustomResponseDto<MovieDetailDTOs>.Success(200, movieDetail));
         }
 
         /// <summary>
@@ -75,11 +133,32 @@ namespace Movies.API.Controllers
         /// <returns></returns>
         [HttpPost]
         [Produces("application/json")]
-        public async Task<IActionResult> Post(int id)
+        public async Task<IActionResult> Post(int id, string note, int point)
         {
-            //Seçilen Filme Not Ve Puan Ekleme 
+            string apiKey = ApiKey();
+            string baseUrl = BaseUrl();
 
-            return Ok();
+            string apiUrl = baseUrl + "movie/" + id + "?api_key=" + apiKey;
+            var response = WebHelper.Get(apiUrl);
+            var myDeserializedClass = JsonConvert.DeserializeObject<Movie>(response);
+
+            var movieDetail = _mapper.Map<MovieDTOs>(myDeserializedClass);
+
+
+            if (movieDetail != null)
+            {
+                MovieReview entity = new MovieReview();
+
+                entity.Note = note;
+                entity.Score = point;
+                entity.MovieId = movieDetail.id;
+                entity.UserId = 1;  // şimdilik bir 
+
+                await _movieReviewsService.AddAsync(entity);
+            }
+
+            return CreateActionResult(CustomResponseDto<MovieDTOs>.Success(200, movieDetail));
+
         }
 
         /// <summary>
