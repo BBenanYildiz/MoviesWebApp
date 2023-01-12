@@ -117,7 +117,7 @@ namespace Movies.Service.Services
 
                 //DATA ÇEKİLİCEK
 
-                if (MovieDetailDTOs is null)
+                //if (MovieDetailDTOs is null)
                     return ApiResponse.CreateResponse(HttpStatusCode.NoContent, ApiResponse.ErrorMessage);
 
                 //data setlenicek dto nesnesine
