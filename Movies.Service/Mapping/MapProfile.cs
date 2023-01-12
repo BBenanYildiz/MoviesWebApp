@@ -22,12 +22,10 @@ namespace NLayerApp.Service.Mapping
             CreateMap<MovieReview, MovieReviewDTOs>().ReverseMap();
             CreateMap<MovieReviewDTOs, MovieReview>().ReverseMap();
 
+            CreateMap<MovieReview, MovieReviewDetailsDTOs>().ReverseMap();
+
             CreateMap<Movie, MovieDetailDTOs>().ReverseMap();
             CreateMap<MovieDetailDTOs, Movie>().ReverseMap();
-
-            CreateMap<MovieReview, MovieReviewDetailsDTOs>().ReverseMap();
-            CreateMap<MovieReviewDetailsDTOs, MovieReview>().ReverseMap();
-
         }
     }
 }

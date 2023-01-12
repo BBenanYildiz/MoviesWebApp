@@ -5,6 +5,7 @@ using Movies.Core.Repositories;
 using Movies.Core.Services;
 using Movies.Core.UnitOfWorks;
 using NLayerApp.Core.Services;
+using NLayerApp.Repository.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,5 +25,13 @@ namespace Movies.Service.Services
             _mapper = mapper;
         }
 
+        public List<MovieReviewDetailsDTOs> GetMovieReviewWitByMovieId(int movie_id)
+        {
+            var movieReviews = _movieReviewRepository.GetMovieReviewWitByMovieId(movie_id);
+
+            var movieReviewsDto = _mapper.Map<List<MovieReviewDetailsDTOs>>(movieReviews);
+
+            return movieReviewsDto;
+        }
     }
 }

@@ -90,7 +90,6 @@ namespace Movies.API.Controllers
         }
 
 
-
         /// <summary>
         /// Film detayını getirir.
         /// </summary>
@@ -113,15 +112,9 @@ namespace Movies.API.Controllers
             var movieDetail = _mapper.Map<MovieDetailDTOs>(myDeserializedClass);
 
             //Filme ait yorumlar ve puanlar çekilir.
-            var movieReivewDetail = _movieReviewsService
-                .GetAllAsync()
-                .Result
-                .Where(x=>x.MovieId== movieDetail.id);
+            var movieReivewDetail = _movieReviewsService.GetMovieReviewWitByMovieId(movieDetail.id);
 
-            var movieReivewDetailDTOs = _mapper.Map<List<MovieReviewDetailsDTOs>>(movieReivewDetail);
-
-
-            movieDetail.details = movieReivewDetailDTOs.ToList();
+            movieDetail.details = movieReivewDetail;
 
             return CreateActionResult(CustomResponseDto<MovieDetailDTOs>.Success(200, movieDetail));
         }

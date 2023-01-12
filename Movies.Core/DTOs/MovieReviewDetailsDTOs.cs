@@ -10,7 +10,6 @@ namespace Movies.Core.DTOs
     public class MovieReviewDetailsDTOs
     {
         public int Score { get; set; }
-        public int Note { get; set; }
-        public int UserId { get; set; }
+        public string Note { get; set; }
     }
 }

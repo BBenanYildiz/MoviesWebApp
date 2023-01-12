@@ -11,5 +11,6 @@ namespace NLayerApp.Core.Services
 {
     public interface IMovieReviewsService : IGenericService<MovieReview>
     {
+        List<MovieReviewDetailsDTOs> GetMovieReviewWitByMovieId(int movie_id);
     }
 }

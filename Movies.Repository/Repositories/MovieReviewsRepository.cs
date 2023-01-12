@@ -17,5 +17,10 @@ namespace NLayerApp.Repository.Repositories
         {
 
         }
+
+        public List<MovieReview> GetMovieReviewWitByMovieId(int movie_id)
+        {
+            return  _context.MovieReviews.Where(x => x.MovieId == movie_id).ToList();
+        }
     }
 }
