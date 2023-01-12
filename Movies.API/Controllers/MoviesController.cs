@@ -76,9 +76,9 @@ namespace Movies.API.Controllers
         [Produces("application/json")]
         public async Task<IActionResult> GetDetail(int id)
         {
-            var result = _moviesService.GetDetail(id);
-            //return StatusCode((int)result.StatusCode, result)
-            return Ok();
+            var result = await _moviesService.GetDetail(id);
+
+            return StatusCode((int)result.StatusCode, result);
         }
 
         /// <summary>

@@ -20,11 +20,14 @@ namespace Movies.Service.Services
     {
         private readonly IMoviesRepository _moviesRepository;
         private readonly IMapper _mapper;
+        private readonly IMovieReviewsService _movieReviewsService;
         public MoviesService(IGenericRepository<Movie> repository,
-            IUnitOfWork unitOfWork, IMoviesRepository moviesRepository, IMapper mapper) : base(repository, unitOfWork)
+            IUnitOfWork unitOfWork, IMoviesRepository moviesRepository, IMapper mapper,
+            IMovieReviewsService movieReviewsService) : base(repository, unitOfWork)
         {
             _moviesRepository = moviesRepository;
             _mapper = mapper;
+            _movieReviewsService = movieReviewsService;
         }
 
         /// <summary>
@@ -45,26 +48,32 @@ namespace Movies.Service.Services
                 if (!validationEmailResult.IsValid)
                     throw new DirectoryNotFoundException(validationEmailResult.Message);
 
-                //Filmin Detayları Çekilecek
+                var movieDetail = await this.GetByIdAsync(id);
 
-                //Burda Gelen Datalar İle Doldurulacak Alan
-                MailSendInformationModel mailInformation = new MailSendInformationModel
+                if (movieDetail != null)
                 {
-                    Imbdpoint = "3",
-                    MovieDate = "1999/20/03",
-                    MovieName = "Leyla İle Mecnun",
-                    MailAdress = mailAdress
-                };
+                    //Burda Gelen Datalar İle Doldurulacak Alan
+                    MailSendInformationModel mailInformation = new MailSendInformationModel
+                    {
+                        Imbdpoint = movieDetail.vote_average.ToString(),
+                        MovieDate = movieDetail.release_date,
+                        MovieName = movieDetail.original_title,
+                        MailAdress = mailAdress
+                    };
 
-                var mailResult = MailHelper.SendMailInformation(mailInformation);
-                if (!mailResult)
+                    var mailResult = MailHelper.SendMailInformation(mailInformation);
+                    if (!mailResult)
+                        return ApiResponse.CreateResponse(HttpStatusCode.NoContent, ApiResponse.ErrorMessage);
+
+                    return ApiResponse.CreateResponse(HttpStatusCode.OK, ApiResponse.SuccessMessage);
+                }
+                else
+                {
                     return ApiResponse.CreateResponse(HttpStatusCode.NoContent, ApiResponse.ErrorMessage);
-
-                return ApiResponse.CreateResponse(HttpStatusCode.OK, ApiResponse.SuccessMessage);
+                }
             }
             catch (Exception ex)
             {
-                //Buraya Log atmak lazım
                 throw ex;
             }
         }
@@ -115,18 +124,23 @@ namespace Movies.Service.Services
                 if (!validationIDResult.IsValid)
                     throw new DirectoryNotFoundException(validationIDResult.Message);
 
-                //DATA ÇEKİLİCEK
+                var movie = await this.GetByIdAsync(id);
 
-                //if (MovieDetailDTOs is null)
+                if (movie != null)
+                {
+                    var movieDetail = _mapper.Map<MovieDetailDTOs>(movie);
+                    var movieReivewDetail = _movieReviewsService.GetMovieReviewWitByMovieId(id);
+
+                    movieDetail.details = movieReivewDetail;
+
+                    return ApiResponse.CreateResponse(HttpStatusCode.OK, ApiResponse.SuccessMessage, movieDetail);
+                }
+                else
+                {
                     return ApiResponse.CreateResponse(HttpStatusCode.NoContent, ApiResponse.ErrorMessage);
 
-                //data setlenicek dto nesnesine
+                }
 
-                //var movieReivewDetail = _movieReviewsService.GetMovieReviewWitByMovieId(movieDetail.id);
-
-                //movieDetail.details = movieReivewDetail;
-
-                return ApiResponse.CreateResponse(HttpStatusCode.OK, ApiResponse.SuccessMessage); // Data Eklenecek
             }
             catch (Exception ex)
             {
