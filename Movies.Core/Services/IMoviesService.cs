@@ -13,7 +13,7 @@ namespace NLayerApp.Core.Services
 {
     public interface IMoviesService : IGenericService<Movie>
     {
-        Task<Movie> InsertMovies(Root moviesList);
+        int InsertMovies(Root moviesList);
 
         Task<ApiResponse> SharedMail(int id, string mailAdress);
 

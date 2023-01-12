@@ -114,17 +114,16 @@ namespace Movies.Service.Services
         /// </summary>
         /// <param name="moviesList"></param>
         /// <returns></returns>
-        public async Task<Movie> InsertMovies(Root moviesList)
+        public int InsertMovies(Root moviesList)
         {
             try
             {
-
-                var rootDtos = _mapper.Map<List<MovieDTOs>>(moviesList.results.ToList());
-
                 Movie entity = new Movie();
                 //var result
-                foreach (var item in rootDtos)
+                foreach (var item in moviesList.results)
                 {
+                    entity = new Movie();
+
                     entity.adult = item.adult;
                     entity.backdrop_path = item.backdrop_path;
                     entity.original_language = item.original_language;
@@ -138,16 +137,16 @@ namespace Movies.Service.Services
                     entity.vote_average = item.vote_average;
                     entity.vote_count = item.vote_count;
 
-                    entity = await AddAsync(entity);
+                    AddAsync(entity);
                 }
 
-                return entity;
+                return 1;
             }
             catch (Exception ex)
             {
                 throw new Exception("İşlem Sırasında Hata Meydana Geldi.");
             }
-          
+
         }
 
         /// <summary>
