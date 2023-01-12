@@ -116,29 +116,38 @@ namespace Movies.Service.Services
         /// <returns></returns>
         public async Task<Movie> InsertMovies(Root moviesList)
         {
-            var rootDtos = _mapper.Map<List<MovieDTOs>>(moviesList.results.ToList());
-
-            foreach (var item in rootDtos)
+            try
             {
+
+                var rootDtos = _mapper.Map<List<MovieDTOs>>(moviesList.results.ToList());
+
                 Movie entity = new Movie();
+                //var result
+                foreach (var item in rootDtos)
+                {
+                    entity.adult = item.adult;
+                    entity.backdrop_path = item.backdrop_path;
+                    entity.original_language = item.original_language;
+                    entity.original_title = item.original_title;
+                    entity.overview = item.overview;
+                    entity.popularity = item.popularity;
+                    entity.poster_path = item.poster_path;
+                    entity.release_date = item.release_date;
+                    entity.title = item.title;
+                    entity.video = item.video;
+                    entity.vote_average = item.vote_average;
+                    entity.vote_count = item.vote_count;
 
-                entity.adult = item.adult;
-                entity.backdrop_path = item.backdrop_path;
-                entity.original_language = item.original_language;
-                entity.original_title = item.original_title;
-                entity.overview = item.overview;
-                entity.popularity = item.popularity;
-                entity.poster_path = item.poster_path;
-                entity.release_date = item.release_date;
-                entity.title = item.title;
-                entity.video = item.video;
-                entity.vote_average = item.vote_average;
-                entity.vote_count = item.vote_count;
+                    entity = await AddAsync(entity);
+                }
 
-                return await AddAsync(entity);
+                return entity;
             }
-
-            return null;
+            catch (Exception ex)
+            {
+                throw new Exception("İşlem Sırasında Hata Meydana Geldi.");
+            }
+          
         }
 
         /// <summary>
