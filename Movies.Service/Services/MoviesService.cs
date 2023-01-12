@@ -2,6 +2,8 @@
 using Movies.Core.DTOs;
 using Movies.Core.Helper;
 using Movies.Core.Model;
+using Movies.Core.Model.RequestModel;
+using Movies.Core.Model.ResponseModel;
 using Movies.Core.Repositories;
 using Movies.Core.Services;
 using Movies.Core.UnitOfWorks;
@@ -50,27 +52,56 @@ namespace Movies.Service.Services
 
                 var movieDetail = await this.GetByIdAsync(id);
 
-                if (movieDetail != null)
-                {
-                    //Burda Gelen Datalar İle Doldurulacak Alan
-                    MailSendInformationModel mailInformation = new MailSendInformationModel
-                    {
-                        Imbdpoint = movieDetail.vote_average.ToString(),
-                        MovieDate = movieDetail.release_date,
-                        MovieName = movieDetail.original_title,
-                        MailAdress = mailAdress
-                    };
-
-                    var mailResult = MailHelper.SendMailInformation(mailInformation);
-                    if (!mailResult)
-                        return ApiResponse.CreateResponse(HttpStatusCode.NoContent, ApiResponse.ErrorMessage);
-
-                    return ApiResponse.CreateResponse(HttpStatusCode.OK, ApiResponse.SuccessMessage);
-                }
-                else
-                {
+                if (movieDetail is null)
                     return ApiResponse.CreateResponse(HttpStatusCode.NoContent, ApiResponse.ErrorMessage);
-                }
+
+                MailSendInformationModel mailInformation = new MailSendInformationModel
+                {
+                    Imbdpoint = movieDetail.vote_average.ToString(),
+                    MovieDate = movieDetail.release_date,
+                    MovieName = movieDetail.original_title,
+                    MailAdress = mailAdress
+                };
+
+                var mailResult = MailHelper.SendMailInformation(mailInformation);
+                if (!mailResult)
+                    return ApiResponse.CreateResponse(HttpStatusCode.NoContent, ApiResponse.ErrorMessage);
+
+                return ApiResponse.CreateResponse(HttpStatusCode.OK, ApiResponse.SuccessMessage);
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        /// <summary>
+        /// Seçilen Filmin Detayını, puanı ve kullanıcı yorumlarını getirir.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="mailAdress"></param>
+        /// <returns></returns>
+        public async Task<ApiResponse> GetDetail(int id)
+        {
+            try
+            {
+                var validationIDResult = CustomValidation.IsValidID(id);
+                if (!validationIDResult.IsValid)
+                    throw new DirectoryNotFoundException(validationIDResult.Message);
+
+                var movie = await GetByIdAsync(id);
+
+                if (movie is null)
+                    return ApiResponse.CreateResponse(HttpStatusCode.NoContent, ApiResponse.ErrorMessage);
+
+                var movieDetail = _mapper.Map<MovieDetailDTOs>(movie);
+                var movieReivewDetail = _movieReviewsService.GetMovieReviewWitByMovieId(id);
+
+                movieDetail.details = movieReivewDetail;
+
+                return ApiResponse.CreateResponse(HttpStatusCode.OK, ApiResponse.SuccessMessage, movieDetail);
+
             }
             catch (Exception ex)
             {
@@ -111,12 +142,12 @@ namespace Movies.Service.Services
         }
 
         /// <summary>
-        /// Seçilen Filmi verilen mail adresine gönderir
+        /// Seçilen Filme yorum ve puan ekler.
         /// </summary>
         /// <param name="id"></param>
         /// <param name="mailAdress"></param>
         /// <returns></returns>
-        public async Task<ApiResponse> GetDetail(int id)
+        public async Task<ApiResponse> Post(int id, MovieCommentAndPointRequestModel model)
         {
             try
             {
@@ -124,31 +155,31 @@ namespace Movies.Service.Services
                 if (!validationIDResult.IsValid)
                     throw new DirectoryNotFoundException(validationIDResult.Message);
 
-                var movie = await this.GetByIdAsync(id);
+                var movieDetail = await this.GetByIdAsync(id);
 
-                if (movie != null)
-                {
-                    var movieDetail = _mapper.Map<MovieDetailDTOs>(movie);
-                    var movieReivewDetail = _movieReviewsService.GetMovieReviewWitByMovieId(id);
-
-                    movieDetail.details = movieReivewDetail;
-
-                    return ApiResponse.CreateResponse(HttpStatusCode.OK, ApiResponse.SuccessMessage, movieDetail);
-                }
-                else
-                {
+                if (movieDetail is null)
                     return ApiResponse.CreateResponse(HttpStatusCode.NoContent, ApiResponse.ErrorMessage);
 
-                }
+                MovieReview entity = new MovieReview();
+
+                entity.Note = model.Comment;
+                entity.Score = model.Point;
+                entity.MovieId = movieDetail.id;
+                entity.UserId = 1;
+
+                var resultInsert = await _movieReviewsService.AddAsync(entity);
+
+                if (resultInsert is null)
+                    return ApiResponse.CreateResponse(HttpStatusCode.NoContent, ApiResponse.ErrorMessage);
+
+                return ApiResponse.CreateResponse(HttpStatusCode.OK, ApiResponse.SuccessMessage, resultInsert);
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                return ApiResponse.CreateResponse(HttpStatusCode.InternalServerError, ApiResponse.SuccessMessage);
             }
         }
-
-
 
     }
 }

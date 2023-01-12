@@ -4,19 +4,21 @@ using Microsoft.AspNetCore.Mvc;
 using Movies.Core.DTOs;
 using Movies.Core.Helper;
 using Movies.Core.Model;
+using Movies.Core.Model.RequestModel;
 using Movies.Service.Services;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NLayerApp.Core.Services;
 using System.Drawing;
 using System.Globalization;
+using System.Net;
 using System.Threading;
 
 namespace Movies.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class MoviesController : CustomBaseController
+    public class MoviesController : ControllerBase
     {
         private readonly IConfiguration _configuration;
         private readonly IMapper _mapper;
@@ -38,32 +40,32 @@ namespace Movies.API.Controllers
         /// Bu kısımı göstermeyeceğiz
         /// </summary>
         /// <returns></returns>
-        [HttpGet]
-        [Produces("application/json")]
-        public async Task<IActionResult> GetAll()
-        {
-            string apiKey = ApiKey();
-            string baseUrl = BaseUrl();
-            string apiUrl = baseUrl + "discover/movie?api_key=" + apiKey;
+        //[HttpGet]
+        //[Produces("application/json")]
+        //public async Task<IActionResult> GetAll()
+        //{
+        //    string apiKey = ApiKey();
+        //    string baseUrl = BaseUrl();
+        //    string apiUrl = baseUrl + "discover/movie?api_key=" + apiKey;
 
-            return Ok();
-        }
+        //    return
+        //}
 
-        [Route("get/{page}", Name = "GetMoviePage")]
-        [HttpGet]
-        [Produces("application/json")]
-        public async Task<IActionResult> GetMoviePage(int page)
-        {
-            string apiKey = ApiKey();
-            string baseUrl = BaseUrl();
-            string apiUrl = baseUrl + "discover/movie?api_key=" + apiKey + "&sort_by=popularity.desc&page=" + page;
+        //[Route("get/{page}", Name = "GetMoviePage")]
+        //[HttpGet]
+        //[Produces("application/json")]
+        //public async Task<IActionResult> GetMoviePage(int page)
+        //{
+        //    string apiKey = ApiKey();
+        //    string baseUrl = BaseUrl();
+        //    string apiUrl = baseUrl + "discover/movie?api_key=" + apiKey + "&sort_by=popularity.desc&page=" + page;
 
-            var response = WebHelper.Get(apiUrl);
-            Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(response);
-            var rootDtos = _mapper.Map<List<MovieDTOs>>(myDeserializedClass.results.ToList());
+        //    var response = WebHelper.Get(apiUrl);
+        //    Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(response);
+        //    var rootDtos = _mapper.Map<List<MovieDTOs>>(myDeserializedClass.results.ToList());
 
-            return CreateActionResult(CustomResponseDto<List<MovieDTOs>>.Success(200, rootDtos));
-        }
+        //    return CreateActionResult(CustomResponseDto<List<MovieDTOs>>.Success(200, rootDtos));
+        //}
 
 
         /// <summary>
@@ -85,35 +87,15 @@ namespace Movies.API.Controllers
         /// Seçilen filme not ve puan ekleme yapar.
         /// </summary>
         /// <param name="id"></param>
+        /// <param name="movieCommentAndPointRequestModel"></param>
         /// <returns></returns>
+        [Route("{id}")]
         [HttpPost]
         [Produces("application/json")]
-        public async Task<IActionResult> Post(int id, string note, int point)
+        public async Task<IActionResult> Post(int id, MovieCommentAndPointRequestModel movieCommentAndPointRequestModel)
         {
-            string apiKey = ApiKey();
-            string baseUrl = BaseUrl();
-
-            string apiUrl = baseUrl + "movie/" + id + "?api_key=" + apiKey;
-            var response = WebHelper.Get(apiUrl);
-            var myDeserializedClass = JsonConvert.DeserializeObject<Movie>(response);
-
-            var movieDetail = _mapper.Map<MovieDTOs>(myDeserializedClass);
-
-
-            if (movieDetail != null)
-            {
-                MovieReview entity = new MovieReview();
-
-                entity.Note = note;
-                entity.Score = point;
-                entity.MovieId = movieDetail.id;
-                entity.UserId = 1;  // şimdilik bir 
-
-                await _movieReviewsService.AddAsync(entity);
-            }
-
-            return CreateActionResult(CustomResponseDto<MovieDTOs>.Success(200, movieDetail));
-
+            var result = await _moviesService.Post(id, movieCommentAndPointRequestModel);
+            return StatusCode((int)result.StatusCode, result);
         }
 
         /// <summary>
