@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Movies.Core.DTOs;
 using Movies.Core.Helper;
 using Movies.Core.Model;
 using Movies.Core.Repositories;
@@ -9,6 +10,7 @@ using NLayerApp.Core.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -31,9 +33,8 @@ namespace Movies.Service.Services
         /// <param name="id"></param>
         /// <param name="mailAdress"></param>
         /// <returns></returns>
-        public static string SharedMail(int id, string mailAdress)
+        public async Task<ApiResponse> SharedMail(int id, string mailAdress)
         {
-            //Bir Result geri dönüş nesnesi oluşturulmalı
             try
             {
                 var validationIDResult = CustomValidation.IsValidID(id);
@@ -57,18 +58,83 @@ namespace Movies.Service.Services
 
                 var mailResult = MailHelper.SendMailInformation(mailInformation);
                 if (!mailResult)
-                    throw new DirectoryNotFoundException("E-Posta Gönderilirken Bir Hata İle Karşılaşıldı.");
+                    return ApiResponse.CreateResponse(HttpStatusCode.NoContent, ApiResponse.ErrorMessage);
 
-
-                return "İşlem Başarılı"; //Burası Result İle Dönmeli
+                return ApiResponse.CreateResponse(HttpStatusCode.OK, ApiResponse.SuccessMessage);
             }
             catch (Exception ex)
             {
-
                 //Buraya Log atmak lazım
                 throw ex;
             }
         }
+
+        /// <summary>
+        /// Film listesini kayıt eder.
+        /// </summary>
+        /// <param name="moviesList"></param>
+        /// <returns></returns>
+        public async Task<Movie> InsertMovies(Root moviesList)
+        {
+            var rootDtos = _mapper.Map<List<MovieDTOs>>(moviesList.results.ToList());
+
+            foreach (var item in rootDtos)
+            {
+                Movie entity = new Movie();
+
+                entity.adult = item.adult;
+                entity.backdrop_path = item.backdrop_path;
+                entity.original_language = item.original_language;
+                entity.original_title = item.original_title;
+                entity.overview = item.overview;
+                entity.popularity = item.popularity;
+                entity.poster_path = item.poster_path;
+                entity.release_date = item.release_date;
+                entity.title = item.title;
+                entity.video = item.video;
+                entity.vote_average = item.vote_average;
+                entity.vote_count = item.vote_count;
+
+                return await AddAsync(entity);
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Seçilen Filmi verilen mail adresine gönderir
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="mailAdress"></param>
+        /// <returns></returns>
+        public async Task<ApiResponse> GetDetail(int id)
+        {
+            try
+            {
+                var validationIDResult = CustomValidation.IsValidID(id);
+                if (!validationIDResult.IsValid)
+                    throw new DirectoryNotFoundException(validationIDResult.Message);
+
+                //DATA ÇEKİLİCEK
+
+                if (MovieDetailDTOs is null)
+                    return ApiResponse.CreateResponse(HttpStatusCode.NoContent, ApiResponse.ErrorMessage);
+
+                //data setlenicek dto nesnesine
+
+                //var movieReivewDetail = _movieReviewsService.GetMovieReviewWitByMovieId(movieDetail.id);
+
+                //movieDetail.details = movieReivewDetail;
+
+                return ApiResponse.CreateResponse(HttpStatusCode.OK, ApiResponse.SuccessMessage); // Data Eklenecek
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+
 
     }
 }

@@ -46,31 +46,7 @@ namespace Movies.API.Controllers
             string baseUrl = BaseUrl();
             string apiUrl = baseUrl + "discover/movie?api_key=" + apiKey;
 
-            var response = WebHelper.Get(apiUrl);
-            Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(response);
-            var rootDtos = _mapper.Map<List<MovieDTOs>>(myDeserializedClass.results.ToList());
-
-            foreach (var item in rootDtos)
-            {
-                Movie entity = new Movie();
-
-                entity.adult = item.adult;
-                entity.backdrop_path = item.backdrop_path;
-                entity.original_language = item.original_language;
-                entity.original_title = item.original_title;
-                entity.overview = item.overview;
-                entity.popularity = item.popularity;
-                entity.poster_path = item.poster_path;
-                entity.release_date = item.release_date;
-                entity.title = item.title;
-                entity.video = item.video;
-                entity.vote_average = item.vote_average;
-                entity.vote_count = item.vote_count;
-
-                await _moviesService.AddAsync(entity);
-            }
-
-            return CreateActionResult(CustomResponseDto<List<MovieDTOs>>.Success(200, rootDtos));
+            return Ok();
         }
 
         [Route("get/{page}", Name = "GetMoviePage")]
@@ -100,23 +76,9 @@ namespace Movies.API.Controllers
         [Produces("application/json")]
         public async Task<IActionResult> GetDetail(int id)
         {
-            //Filmin Detayını Döndüğümüz Kısım Api
-
-            string apiKey = ApiKey();
-            string baseUrl = BaseUrl();
-
-            string apiUrl = baseUrl + "movie/" + id + "?api_key=" + apiKey;
-            var response = WebHelper.Get(apiUrl);
-            var myDeserializedClass = JsonConvert.DeserializeObject<Movie>(response);
-
-            var movieDetail = _mapper.Map<MovieDetailDTOs>(myDeserializedClass);
-
-            //Filme ait yorumlar ve puanlar çekilir.
-            var movieReivewDetail = _movieReviewsService.GetMovieReviewWitByMovieId(movieDetail.id);
-
-            movieDetail.details = movieReivewDetail;
-
-            return CreateActionResult(CustomResponseDto<MovieDetailDTOs>.Success(200, movieDetail));
+            var result = _moviesService.GetDetail(id);
+            //return StatusCode((int)result.StatusCode, result)
+            return Ok();
         }
 
         /// <summary>
@@ -165,23 +127,9 @@ namespace Movies.API.Controllers
         [Produces("application/json")]
         public async Task<IActionResult> Shared(int id, string mailAdress)
         {
-            //Filmi Tavsiye Etme 
-
-            var result = MoviesService.SharedMail(id, mailAdress);
-
-            //Sonuça göre işlem yapıcaz direk resultu basıcaz
-
-            if (!string.IsNullOrEmpty(result))
-            {
-                // Bakılacak
-                return CreateActionResult(CustomResponseDto<NoContentDTO>.Success(200));
-            }
-            else
-            {
-                return CreateActionResult(CustomResponseDto<NoContentDTO>.Fail(400, "E-Posta Gönderilirken Bir Hata İle Karşılaşıldı."));
-            }
+            var result = await _moviesService.SharedMail(id, mailAdress);
+            return StatusCode((int)result.StatusCode, result);
         }
-
 
         //AppSetting Dosyasından Api Keyi Çekiyoruz.
         private string ApiKey()
@@ -196,5 +144,6 @@ namespace Movies.API.Controllers
             var baseUrl = _configuration.GetValue<string>("BaseUrl:base_url");
             return baseUrl;
         }
+
     }
 }

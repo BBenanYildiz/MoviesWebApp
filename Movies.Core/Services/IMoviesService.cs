@@ -1,4 +1,5 @@
-﻿using Movies.Core.Model;
+﻿using Movies.Core.DTOs;
+using Movies.Core.Model;
 using Movies.Core.Services;
 using System;
 using System.Collections.Generic;
@@ -10,5 +11,10 @@ namespace NLayerApp.Core.Services
 {
     public interface IMoviesService : IGenericService<Movie>
     {
+        Task<Movie> InsertMovies(Root moviesList);
+
+        Task<ApiResponse> SharedMail(int id, string mailAdress);
+
+        Task<ApiResponse> GetDetail(int id);
     }
 }
