@@ -26,5 +26,24 @@ namespace Movies.Core.Helper
 
             return (true, "Validasyon başarılı");
         }
+
+        public static (bool IsValid, string Message) IsValidPoint(int point)
+        {
+            if (point == 0)
+                return (false, "Puan 0 olamaz");
+
+            if (point <= 1 || point >= 10)
+                return (false, "1 ile 10 Arasında bir tam sayı giriniz.");
+
+            return (true, "Validasyon başarılı");
+        }
+
+        public static (bool IsValid, string Message) IsValidComment(string comment)
+        {
+            if (string.IsNullOrEmpty(comment))
+                return (false, "İçerik giriniz.");
+
+            return (true, "Validasyon başarılı");
+        }
     }
 }

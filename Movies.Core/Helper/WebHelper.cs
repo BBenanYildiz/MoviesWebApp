@@ -22,5 +22,20 @@ namespace Movies.Core.Helper
                 return reader.ReadToEnd();
             }
         }
+
+        public static string ApiKey()
+        {
+            return "2ffe153e25788cfac01580dae1018af4";
+        }
+
+        public static string BaseUrl()
+        {
+            return "https://api.themoviedb.org/3/";
+        }
+
+        public static string CreateUrlApiKey(string url)
+        {
+            return BaseUrl() + url + ApiKey();
+        } 
     }
 }

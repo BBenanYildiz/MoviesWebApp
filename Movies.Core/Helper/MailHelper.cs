@@ -6,7 +6,6 @@ namespace Movies.Core.Helper
 {
     public class MailHelper
     {
-        //E-postayı gönderiyoruz.
         public static bool SenAdMail(MailHelperModel model)
         {
             using (var client = new SmtpClient(model.smtp, model.smtpPort)
@@ -41,7 +40,6 @@ namespace Movies.Core.Helper
             }
         }
 
-        //E-posta için gerekli bilgileri dolduruyoruz.
         public static bool SendMailInformation(MailSendInformationModel mailInformation)
         {
             #region MailTemplate
@@ -66,6 +64,30 @@ namespace Movies.Core.Helper
                 return true;
             else
                 return false;
+        }
+
+        public static void SystemInformationMail(string exception = "", string message = "", string subject = "Sistem Bilgilendirmesi")
+        {
+            #region MailTemplate
+
+            string bodyDetail = "Sistem Tarafından Gönderilmiş Maildir. <br>" +
+                   "Mesaj: " + message + "<br>" +
+                   "Tarih: " + DateTime.Now.ToString() + "<br> +" +
+                   "Exception: " + exception + "<br>";
+
+            #endregion
+
+            var mailModel = new MailHelperModel
+            {
+                mailId = "pakcan.emre@gmail.com",
+                mailPass = "zxgvbyxbgjdpkmzn",
+                smtp = "smtp.gmail.com",
+                smtpPort = 587,
+                Subject = subject,
+                Body = bodyDetail,
+                To = new string[] { "pakcan.emre@gmail.com" },  //Buraya kendi mailini koymalısın sistemin mailleri log yerine sana gelicek
+                FromDisplayName = "Sistem Bilgilendirmesi"
+            };
         }
     }
 }

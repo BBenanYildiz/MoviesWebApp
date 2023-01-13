@@ -40,17 +40,6 @@ namespace Movies.API.Controllers
         /// Bu kısımı göstermeyeceğiz
         /// </summary>
         /// <returns></returns>
-        //[HttpGet]
-        //[Produces("application/json")]
-        //public async Task<IActionResult> GetAll()
-        //{
-        //    string apiKey = ApiKey();
-        //    string baseUrl = BaseUrl();
-        //    string apiUrl = baseUrl + "discover/movie?api_key=" + apiKey;
-
-        //    return
-        //}
-
         //[Route("get/{page}", Name = "GetMoviePage")]
         //[HttpGet]
         //[Produces("application/json")]
@@ -111,20 +100,6 @@ namespace Movies.API.Controllers
         {
             var result = await _moviesService.SharedMail(id, mailAdress);
             return StatusCode((int)result.StatusCode, result);
-        }
-
-        //AppSetting Dosyasından Api Keyi Çekiyoruz.
-        private string ApiKey()
-        {
-            var apiKey = _configuration.GetValue<string>("TmbdApiKey:api_key");
-            return apiKey;
-        }
-
-        //AppSetting Dosyasından BaseUrl 'i Çekiyoruz.
-        private string BaseUrl()
-        {
-            var baseUrl = _configuration.GetValue<string>("BaseUrl:base_url");
-            return baseUrl;
         }
 
     }

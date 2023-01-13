@@ -18,15 +18,22 @@ namespace Movies.Core.Helper
 
         public async Task Execute(IJobExecutionContext context)
         {
-            string apiKey = "2ffe153e25788cfac01580dae1018af4";
-            string baseUrl = "https://api.themoviedb.org/3/";
-            string apiUrl = baseUrl + "discover/movie?api_key=" + apiKey;
-            var response = WebHelper.Get(apiUrl);
+            string apiUrl = "discover/movie?api_key=";
+            string requestUrl = WebHelper.CreateUrlApiKey(apiUrl);
+            var response = WebHelper.Get(requestUrl);
             Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(response);
 
            var result = _moviesService.InsertMovies(myDeserializedClass);
 
-            //LOG
+            if (result == 0)
+            {
+                MailHelper.SystemInformationMail("Hata", "DataFetcherJob Başarısız.");
+            }
+            else
+            {
+                MailHelper.SystemInformationMail("Başarılı", "DataFetcherJob Başarılı");
+            }
+           
         }
     }
 

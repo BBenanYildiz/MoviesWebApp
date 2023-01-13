@@ -6,15 +6,10 @@ namespace Movies.API
     {
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddQuartz(q =>
-            {
-                // base Quartz scheduler, job and trigger configuration
-            });
+            services.AddQuartz(q =>{ });
 
-            // ASP.NET Core hosting
             services.AddQuartzServer(options =>
             {
-                // when shutting down we want jobs to complete gracefully
                 options.WaitForJobsToComplete = true;
             });
         }

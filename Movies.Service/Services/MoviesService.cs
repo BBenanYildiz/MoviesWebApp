@@ -44,11 +44,11 @@ namespace Movies.Service.Services
             {
                 var validationIDResult = CustomValidation.IsValidID(id);
                 if (!validationIDResult.IsValid)
-                    throw new DirectoryNotFoundException(validationIDResult.Message);
+                    return ApiResponse.CreateResponse(HttpStatusCode.NoContent, validationIDResult.Message);
 
                 var validationEmailResult = CustomValidation.IsValidEmail(mailAdress);
                 if (!validationEmailResult.IsValid)
-                    throw new DirectoryNotFoundException(validationEmailResult.Message);
+                    return ApiResponse.CreateResponse(HttpStatusCode.NoContent, validationEmailResult.Message);
 
                 var movieDetail = await this.GetByIdAsync(id);
 
@@ -72,7 +72,8 @@ namespace Movies.Service.Services
             }
             catch (Exception ex)
             {
-                throw ex;
+                MailHelper.SystemInformationMail(ex.ToString(), "SharedMail / İşlem Sırasında Hata Meydana Geldi.");
+                return ApiResponse.CreateResponse(HttpStatusCode.InternalServerError, ApiResponse.ErrorMessage);
             }
         }
 
@@ -88,7 +89,7 @@ namespace Movies.Service.Services
             {
                 var validationIDResult = CustomValidation.IsValidID(id);
                 if (!validationIDResult.IsValid)
-                    throw new DirectoryNotFoundException(validationIDResult.Message);
+                    return ApiResponse.CreateResponse(HttpStatusCode.NoContent, validationIDResult.Message);
 
                 var movie = await GetByIdAsync(id);
 
@@ -105,7 +106,8 @@ namespace Movies.Service.Services
             }
             catch (Exception ex)
             {
-                throw ex;
+                MailHelper.SystemInformationMail(ex.ToString(), "GetDetail / İşlem Sırasında Hata Meydana Geldi.");
+                return ApiResponse.CreateResponse(HttpStatusCode.InternalServerError, ApiResponse.ErrorMessage); ;
             }
         }
 
@@ -118,11 +120,12 @@ namespace Movies.Service.Services
         {
             try
             {
+                //Burayı Test etmelisin her seferinde aynı filmleri database kayıt edersek sıkıntı yaşarız. Var olanı kontrol edip güncellememiz gerekli. olmayan varsa onu kayıt edicez.
                 Movie entity = new Movie();
-                //var result
+
                 foreach (var item in moviesList.results)
                 {
-                    entity = new Movie();
+                    var movie = GetByIdAsync(item.id);
 
                     entity.adult = item.adult;
                     entity.backdrop_path = item.backdrop_path;
@@ -137,16 +140,22 @@ namespace Movies.Service.Services
                     entity.vote_average = item.vote_average;
                     entity.vote_count = item.vote_count;
 
-                    AddAsync(entity);
+                    if (movie is null)
+                        AddAsync(entity);
+                    else
+                    {
+                        entity.id = item.id;
+                        UpdateAsync(entity);
+                    }
                 }
 
                 return 1;
             }
             catch (Exception ex)
             {
-                throw new Exception("İşlem Sırasında Hata Meydana Geldi.");
+                MailHelper.SystemInformationMail(ex.ToString(), "InsertMovies / İşlem Sırasında Hata Meydana Geldi.");
+                return 0;
             }
-
         }
 
         /// <summary>
@@ -161,7 +170,15 @@ namespace Movies.Service.Services
             {
                 var validationIDResult = CustomValidation.IsValidID(id);
                 if (!validationIDResult.IsValid)
-                    throw new DirectoryNotFoundException(validationIDResult.Message);
+                    return ApiResponse.CreateResponse(HttpStatusCode.NoContent, validationIDResult.Message);
+
+                var validationPointResult = CustomValidation.IsValidPoint(model.Point);
+                if (!validationPointResult.IsValid)
+                    return ApiResponse.CreateResponse(HttpStatusCode.NoContent,message: validationPointResult.Message);
+
+                var validationCommentResult = CustomValidation.IsValidComment(model.Comment);
+                if (!validationCommentResult.IsValid)
+                    return ApiResponse.CreateResponse(HttpStatusCode.NoContent,message: validationCommentResult.Message);
 
                 var movieDetail = await this.GetByIdAsync(id);
 
@@ -183,9 +200,10 @@ namespace Movies.Service.Services
                 return ApiResponse.CreateResponse(HttpStatusCode.OK, ApiResponse.SuccessMessage, resultInsert);
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return ApiResponse.CreateResponse(HttpStatusCode.InternalServerError, ApiResponse.SuccessMessage);
+                MailHelper.SystemInformationMail(ex.ToString(), "Post / İşlem Sırasında Hata Meydana Geldi.");
+                return ApiResponse.CreateResponse(HttpStatusCode.InternalServerError, ApiResponse.ErrorMessage);
             }
         }
 
