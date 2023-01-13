@@ -15,7 +15,12 @@ namespace NLayerApp.Repository.Repositories
     {
         public UsersRepository(AppDbContext context) : base(context)
         {
+           
         }
-      
+
+        public async Task<User> GetUser(string email, string password)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.Mail == email && u.Password == password);
+        }
     }
 }

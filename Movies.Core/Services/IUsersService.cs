@@ -10,5 +10,6 @@ namespace NLayerApp.Core.Services
 {
     public interface IUsersService : IGenericService<User>
     {
+        Task<User> GetUser(string email, string password);
     }
 }

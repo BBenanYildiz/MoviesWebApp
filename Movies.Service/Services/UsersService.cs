@@ -23,5 +23,9 @@ namespace Movies.Service.Services
             _mapper = mapper;
         }
 
+        public async Task<User> GetUser(string email, string password)
+        {
+            return await _usersRepository.GetUser(email, password);
+        }
     }
 }
