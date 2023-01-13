@@ -16,7 +16,8 @@ using System.Net;
 using System.Threading;
 
 namespace Movies.API.Controllers
-{
+{ 
+
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
