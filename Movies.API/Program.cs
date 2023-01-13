@@ -59,7 +59,7 @@ builder.Services.AddQuartz(q =>
         .ForJob(jobKey)
         .WithIdentity("DataFetcherJob-trigger")
         //This Cron interval can be described as "run every minute" (when second is zero)
-        .WithCronSchedule("0 0/1 * 1/1 * ? *")
+        .WithCronSchedule("0 0 0/1 1/1 * ? *")
     );
 });
 builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);

@@ -21,6 +21,7 @@ namespace NLayerApp.Core.Services
 
         Task<ApiResponse> Post(int id, MovieCommentAndPointRequestModel model);
 
-        Movie GetMovieDetailWithByTitle(string orjinal_title);
+        Task<ApiResponse> Get();
+
     }
 }

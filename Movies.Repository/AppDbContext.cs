@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Movies.Core.Model;
+using Movies.Repository.Initi;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,6 +26,8 @@ namespace Movies.Repository
 
             modelBuilder.Entity<MovieReview>()
              .HasKey(c => new { c.Id });
+
+            new DbInitializer(modelBuilder);
         }
 
         public DbSet<Movie> Movies { get; set; }

@@ -88,6 +88,8 @@ namespace Movies.Core.Helper
                 To = new string[] { "bbenanyildiz@gmail.com" },  
                 FromDisplayName = "Sistem Bilgilendirmesi"
             };
+
+            MailHelper.SenAdMail(mailModel);
         }
     }
 }

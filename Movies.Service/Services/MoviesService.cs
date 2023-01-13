@@ -33,6 +33,31 @@ namespace Movies.Service.Services
         }
 
         /// <summary>
+        /// Tüm film listesini getirir.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="mailAdress"></param>
+        /// <returns></returns>
+        public async Task<ApiResponse> Get()
+        {
+            try
+            {
+                var moviesList = await GetAllAsync();
+
+                if (moviesList is null)
+                    return ApiResponse.CreateResponse(HttpStatusCode.NoContent, ApiResponse.ErrorMessage);
+
+                return ApiResponse.CreateResponse(HttpStatusCode.OK, ApiResponse.SuccessMessage, moviesList);
+
+            }
+            catch (Exception ex)
+            {
+                MailHelper.SystemInformationMail(ex.ToString(), "Get / İşlem Sırasında Hata Meydana Geldi.");
+                return ApiResponse.CreateResponse(HttpStatusCode.InternalServerError, ApiResponse.ErrorMessage); ;
+            }
+        }
+
+        /// <summary>
         /// Seçilen Filmi verilen mail adresine gönderir
         /// </summary>
         /// <param name="id"></param>
@@ -120,21 +145,19 @@ namespace Movies.Service.Services
         {
             try
             {
-                //Burayı Test etmelisin her seferinde aynı filmleri database kayıt edersek sıkıntı yaşarız.
-                //Var olanı kontrol edip güncellememiz gerekli. olmayan varsa onu kayıt edicez.
                 Movie entity = null;
                 bool newRecord = false;
 
                 foreach (var item in moviesList.results)
                 {
-                    entity = GetMovieDetailWithByTitle(item.original_title);
+                    entity = GetAllAsync().Result.Where(x => x.movie_id == item.id).FirstOrDefault();
 
                     if (entity is null)
                     {
                         newRecord = true;
                         entity = new Movie();
                     }
-
+                    entity.movie_id = item.id;
                     entity.adult = item.adult;
                     entity.backdrop_path = item.backdrop_path;
                     entity.original_language = item.original_language;
@@ -215,9 +238,5 @@ namespace Movies.Service.Services
             }
         }
 
-        public Movie GetMovieDetailWithByTitle(string orjinal_title)
-        {
-            return _moviesRepository.GetMovieDetailWithByTitle(orjinal_title);
-        }
     }
 }

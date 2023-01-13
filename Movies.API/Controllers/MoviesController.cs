@@ -38,26 +38,16 @@ namespace Movies.API.Controllers
         }
 
         /// <summary>
-        /// Tüm filmleri getirir ve veritabanına insert işlemi gerçekleştirir.
-        /// Bu kısımı göstermeyeceğiz
+        /// Tüm Filmleri Getirir.
         /// </summary>
         /// <returns></returns>
-        //[Route("get/{page}", Name = "GetMoviePage")]
-        //[HttpGet]
-        //[Produces("application/json")]
-        //public async Task<IActionResult> GetMoviePage(int page)
-        //{
-        //    string apiKey = ApiKey();
-        //    string baseUrl = BaseUrl();
-        //    string apiUrl = baseUrl + "discover/movie?api_key=" + apiKey + "&sort_by=popularity.desc&page=" + page;
-
-        //    var response = WebHelper.Get(apiUrl);
-        //    Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(response);
-        //    var rootDtos = _mapper.Map<List<MovieDTOs>>(myDeserializedClass.results.ToList());
-
-        //    return CreateActionResult(CustomResponseDto<List<MovieDTOs>>.Success(200, rootDtos));
-        //}
-
+        [HttpGet]
+        [Produces("application/json")]
+        public async Task<IActionResult> Get()
+        {
+            var result = await _moviesService.Get();
+            return StatusCode((int)result.StatusCode, result);
+        }
 
         /// <summary>
         /// Film detayını getirir.
@@ -70,7 +60,6 @@ namespace Movies.API.Controllers
         public async Task<IActionResult> GetDetail(int id)
         {
             var result = await _moviesService.GetDetail(id);
-
             return StatusCode((int)result.StatusCode, result);
         }
 

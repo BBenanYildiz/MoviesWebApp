@@ -13,7 +13,7 @@ namespace NLayerApp.Core.Services
     {
         Task<User> GetByUserMailAndPass(string email, string password);
 
-        Task<ApiResponse> InsertUser(User model);
+        Task<User> InsertUser(User model);
 
         Task<ApiResponse> GetToken(User userData);
     }

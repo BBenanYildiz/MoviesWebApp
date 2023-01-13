@@ -17,9 +17,5 @@ namespace NLayerApp.Repository.Repositories
         {
         }
 
-        public Movie GetMovieDetailWithByTitle(string orjinal_title)
-        {
-            return _context.Movies.Where(x => x.original_title == orjinal_title).SingleOrDefault();
-        }
     }
 }

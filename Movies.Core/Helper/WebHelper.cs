@@ -36,6 +36,6 @@ namespace Movies.Core.Helper
         public static string CreateUrlApiKey(string url)
         {
             return BaseUrl() + url + ApiKey();
-        } 
+        }
     }
 }

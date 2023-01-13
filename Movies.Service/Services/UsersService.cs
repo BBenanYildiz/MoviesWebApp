@@ -32,6 +32,12 @@ namespace Movies.Service.Services
             _configuration = configuration;
         }
 
+        /// <summary>
+        /// Mail ve Passworduna göre kullanıcı detayını getirir.
+        /// </summary>
+        /// <param name="email"></param>
+        /// <param name="password"></param>
+        /// <returns></returns>
         public Task<User> GetByUserMailAndPass(string email, string password)
         {
             var userDetail = _usersRepository.GetUser(email, password);
@@ -42,17 +48,14 @@ namespace Movies.Service.Services
             return userDetail;
         }
 
-
         /// <summary>
         /// Seçilen Filme yorum ve puan ekler.
         /// </summary>
         /// <param name="id"></param>
         /// <param name="mailAdress"></param>
         /// <returns></returns>
-        public async Task<ApiResponse> InsertUser(User model)
+        public async Task<User> InsertUser(User model)
         {
-            try
-            {
                 User entity = new User();
 
                 entity.Name = model.Name;
@@ -63,19 +66,17 @@ namespace Movies.Service.Services
 
                 var resultInsert = await this.AddAsync(entity);
 
-                if (resultInsert is null)
-                    return ApiResponse.CreateResponse(HttpStatusCode.NoContent, ApiResponse.ErrorMessage);
+            if (resultInsert is null)
+                return null;
 
-                return ApiResponse.CreateResponse(HttpStatusCode.OK, ApiResponse.SuccessMessage, resultInsert);
-
-            }
-            catch (Exception ex)
-            {
-                MailHelper.SystemInformationMail(ex.ToString(), "Post / İşlem Sırasında Hata Meydana Geldi.");
-                return ApiResponse.CreateResponse(HttpStatusCode.InternalServerError, ApiResponse.ErrorMessage);
-            }
+            return resultInsert;
         }
 
+        /// <summary>
+        /// JWT token oluşturur
+        /// </summary>
+        /// <param name="userData"></param>
+        /// <returns></returns>
         public async Task<ApiResponse> GetToken(User userData)
         {
             try
@@ -94,13 +95,13 @@ namespace Movies.Service.Services
                     var user = await GetByUserMailAndPass(userData.Mail, userData.Password);
 
                     if (user is null)
-                        await InsertUser(userData);
+                        user = await InsertUser(userData);
 
                     var claims = new[] {
                         new Claim(JwtRegisteredClaimNames.Sub, _configuration["JWT:Key"]),
                         new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                         new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
-                        new Claim("Id", user. Id.ToString()),
+                        new Claim("Id", user.Id.ToString()),
                         new Claim("Name", user.Name),
                         new Claim("Username", user.Username),
                         new Claim("Mail", user.Mail)
@@ -128,5 +129,6 @@ namespace Movies.Service.Services
                 return ApiResponse.CreateResponse(HttpStatusCode.InternalServerError, ApiResponse.ErrorMessage);
             }
         }
+        
     }
 }

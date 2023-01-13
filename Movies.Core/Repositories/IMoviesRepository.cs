@@ -9,6 +9,5 @@ namespace Movies.Core.Repositories
 {
     public interface IMoviesRepository : IGenericRepository<Movie>
     {
-        Movie GetMovieDetailWithByTitle(string orjinal_titlr);
     }
 }

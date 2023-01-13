@@ -6,6 +6,7 @@ namespace Movies.Core.Model
     {
         [Key]
         public int id { get; set; }
+        public int movie_id { get; set; }
         public bool adult { get; set; }
         public string backdrop_path { get; set; }
         public string original_language { get; set; }
