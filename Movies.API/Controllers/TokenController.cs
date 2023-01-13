@@ -32,43 +32,8 @@ namespace Movies.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Post(User userData)
         {
-            if (userData != null && userData.Mail != null && userData.Password != null)
-            {
-                var user = await _usersService.GetUser(userData.Mail, userData.Password);
-
-                if (user != null)
-                {
-                    //create claims details based on the user information
-                    var claims = new[] {
-                        new Claim(JwtRegisteredClaimNames.Sub, _configuration["JWT:Key"]),
-                        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                        new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
-                        new Claim("Id", user.Id.ToString()),
-                        new Claim("Name", user.Name),
-                        new Claim("Username", user.Username),
-                        new Claim("Mail", user.Mail)
-                    };
-
-                    var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
-                    var signIn = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-                    var token = new JwtSecurityToken(
-                        _configuration["Jwt:Issuer"],
-                        _configuration["Jwt:Audience"],
-                        claims,
-                        expires: DateTime.UtcNow.AddMinutes(10),
-                        signingCredentials: signIn);
-
-                    return Ok(new JwtSecurityTokenHandler().WriteToken(token));
-                }
-                else
-                {
-                    return BadRequest("Invalid credentials");
-                }
-            }
-            else
-            {
-                return BadRequest();
-            }
+            var result = await _usersService.GetToken(userData);
+            return StatusCode((int)result.StatusCode, result);
         }
     }
 }

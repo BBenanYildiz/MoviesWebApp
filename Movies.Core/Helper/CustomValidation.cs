@@ -45,5 +45,13 @@ namespace Movies.Core.Helper
 
             return (true, "Validasyon başarılı");
         }
+
+        public static (bool IsValid, string Message) IsValidPassword(string password)
+        {
+            if (string.IsNullOrEmpty(password))
+                return (false, "Şifre giriniz.");
+
+            return (true, "Validasyon başarılı");
+        }
     }
 }

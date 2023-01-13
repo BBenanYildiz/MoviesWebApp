@@ -32,7 +32,6 @@ namespace Movies.Service.Services
             _movieReviewsService = movieReviewsService;
         }
 
-
         /// <summary>
         /// Seçilen Filmi verilen mail adresine gönderir
         /// </summary>

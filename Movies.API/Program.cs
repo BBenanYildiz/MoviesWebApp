@@ -115,7 +115,6 @@ builder.Services.AddAuthentication(opt => {
 
 var app = builder.Build();
 
-//Scheduler.Start();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
