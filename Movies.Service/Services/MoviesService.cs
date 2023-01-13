@@ -32,6 +32,7 @@ namespace Movies.Service.Services
             _movieReviewsService = movieReviewsService;
         }
 
+
         /// <summary>
         /// Seçilen Filmi verilen mail adresine gönderir
         /// </summary>
@@ -116,16 +117,24 @@ namespace Movies.Service.Services
         /// </summary>
         /// <param name="moviesList"></param>
         /// <returns></returns>
-        public int InsertMovies(Root moviesList)
+        public async Task<int> InsertMovies(Root moviesList)
         {
             try
             {
-                //Burayı Test etmelisin her seferinde aynı filmleri database kayıt edersek sıkıntı yaşarız. Var olanı kontrol edip güncellememiz gerekli. olmayan varsa onu kayıt edicez.
-                Movie entity = new Movie();
+                //Burayı Test etmelisin her seferinde aynı filmleri database kayıt edersek sıkıntı yaşarız.
+                //Var olanı kontrol edip güncellememiz gerekli. olmayan varsa onu kayıt edicez.
+                Movie entity = null;
+                bool newRecord = false;
 
                 foreach (var item in moviesList.results)
                 {
-                    var movie = GetByIdAsync(item.id);
+                    entity = GetMovieDetailWithByTitle(item.original_title);
+
+                    if (entity is null)
+                    {
+                        newRecord = true;
+                        entity = new Movie();
+                    }
 
                     entity.adult = item.adult;
                     entity.backdrop_path = item.backdrop_path;
@@ -140,12 +149,12 @@ namespace Movies.Service.Services
                     entity.vote_average = item.vote_average;
                     entity.vote_count = item.vote_count;
 
-                    if (movie is null)
-                        AddAsync(entity);
+                    if (newRecord)
+                        await this.AddAsync(entity);
                     else
                     {
                         entity.id = item.id;
-                        UpdateAsync(entity);
+                        await this.UpdateAsync(entity);
                     }
                 }
 
@@ -174,11 +183,11 @@ namespace Movies.Service.Services
 
                 var validationPointResult = CustomValidation.IsValidPoint(model.Point);
                 if (!validationPointResult.IsValid)
-                    return ApiResponse.CreateResponse(HttpStatusCode.NoContent,message: validationPointResult.Message);
+                    return ApiResponse.CreateResponse(HttpStatusCode.NoContent, message: validationPointResult.Message);
 
                 var validationCommentResult = CustomValidation.IsValidComment(model.Comment);
                 if (!validationCommentResult.IsValid)
-                    return ApiResponse.CreateResponse(HttpStatusCode.NoContent,message: validationCommentResult.Message);
+                    return ApiResponse.CreateResponse(HttpStatusCode.NoContent, message: validationCommentResult.Message);
 
                 var movieDetail = await this.GetByIdAsync(id);
 
@@ -207,5 +216,9 @@ namespace Movies.Service.Services
             }
         }
 
+        public Movie GetMovieDetailWithByTitle(string orjinal_title)
+        {
+            return _moviesRepository.GetMovieDetailWithByTitle(orjinal_title);
+        }
     }
 }

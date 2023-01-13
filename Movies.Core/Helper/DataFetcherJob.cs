@@ -23,7 +23,7 @@ namespace Movies.Core.Helper
             var response = WebHelper.Get(requestUrl);
             Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(response);
 
-           var result = _moviesService.InsertMovies(myDeserializedClass);
+           var result = await _moviesService.InsertMovies(myDeserializedClass);
 
             if (result == 0)
             {

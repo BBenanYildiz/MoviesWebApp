@@ -50,8 +50,8 @@ namespace Movies.Core.Helper
 
             var mailModel = new MailHelperModel
             {
-                mailId = "pakcan.emre@gmail.com",
-                mailPass = "zxgvbyxbgjdpkmzn",
+                mailId = "movieapp34@gmail.com",
+                mailPass = "vplnftbogdqxykop",
                 smtp = "smtp.gmail.com",
                 smtpPort = 587,
                 Subject = "Film Önerisi",
@@ -79,13 +79,13 @@ namespace Movies.Core.Helper
 
             var mailModel = new MailHelperModel
             {
-                mailId = "pakcan.emre@gmail.com",
-                mailPass = "zxgvbyxbgjdpkmzn",
+                mailId = "movieapp34@gmail.com",
+                mailPass = "vplnftbogdqxykop",
                 smtp = "smtp.gmail.com",
                 smtpPort = 587,
                 Subject = subject,
                 Body = bodyDetail,
-                To = new string[] { "pakcan.emre@gmail.com" },  //Buraya kendi mailini koymalısın sistemin mailleri log yerine sana gelicek
+                To = new string[] { "bbenanyildiz@gmail.com" },  
                 FromDisplayName = "Sistem Bilgilendirmesi"
             };
         }
