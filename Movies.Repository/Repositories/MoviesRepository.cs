@@ -16,6 +16,6 @@ namespace NLayerApp.Repository.Repositories
         public MoviesRepository(AppDbContext context) : base(context)
         {
         }
-      
+
     }
 }

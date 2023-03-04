@@ -9,5 +9,6 @@ namespace Movies.Core.Repositories
 {
     public interface IUsersRepository : IGenericRepository<User>
     {
+        Task<User> GetUser(string email, string password);
     }
 }
